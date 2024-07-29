@@ -265,12 +265,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     return (
       <div className="visLegend">
-        <EuiToolTip
-          anchorClassName="visLegend__toggleTooltipAnchor"
-          content={label}
-          delay="long"
-          position="bottom"
-        >
+        <EuiToolTip content={label} delay="long" position="bottom">
           <button
             type="button"
             onClick={this.toggleLegend}

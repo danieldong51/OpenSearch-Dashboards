@@ -97,6 +97,7 @@ export interface DiscoverSidebarProps {
    */
   selectedIndexPattern?: IndexPattern;
   isEnhancementsEnabledOverride: boolean;
+  collapseMenuButton: React.FC;
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {

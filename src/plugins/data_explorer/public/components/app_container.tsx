@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -26,6 +27,9 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
 
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
+    const collapseFn = useRef(() => {});
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
@@ -44,10 +48,24 @@ export const AppContainer = React.memo(
     const MemoizedPanel = memo(Panel);
     const MemoizedCanvas = memo(Canvas);
 
+    const onChange = () => {
+      setIsCollapsed(!isCollapsed);
+      collapseFn.current();
+    };
+
     params.optionalRef = {
       topLinkRef,
       datePickerRef,
     };
+
+    const collapseMenuButton = (
+      <EuiButtonIcon
+        aria-label="Toggle sidebar"
+        iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+        onClick={() => onChange()}
+      />
+    );
+
     // Render the application DOM.
     return (
       <div className="mainPage">
@@ -78,33 +96,43 @@ export const AppContainer = React.memo(
           {/* TODO: improve fallback state */}
           <Suspense fallback={<div>Loading...</div>}>
             <Context {...params}>
-              <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={20}
-                      minSize="260px"
-                      mode={['collapsible', { position: 'top' }]}
-                      paddingSize="none"
-                    >
-                      <Sidebar>
-                        <MemoizedPanel {...params} />
-                      </Sidebar>
-                    </EuiResizablePanel>
-                    <EuiResizableButton />
+              <EuiResizableContainer
+                direction={isMobile ? 'vertical' : 'horizontal'}
+                onToggleCollapsed={() => setIsCollapsed(!isCollapsed)}
+              >
+                {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+                  if (togglePanel) {
+                    collapseFn.current = () => togglePanel('panel1', { direction: 'left' });
+                  }
 
-                    <EuiResizablePanel
-                      initialSize={80}
-                      minSize="65%"
-                      mode="main"
-                      paddingSize="none"
-                    >
-                      <EuiPageBody className="deLayout__canvas">
-                        <MemoizedCanvas {...params} />
-                      </EuiPageBody>
-                    </EuiResizablePanel>
-                  </>
-                )}
+                  return (
+                    <>
+                      <EuiResizablePanel
+                        id="panel1"
+                        initialSize={20}
+                        minSize="260px"
+                        mode={['custom', { position: 'top' }]}
+                        paddingSize="none"
+                      >
+                        <Sidebar>
+                          <MemoizedPanel {...params} />
+                        </Sidebar>
+                      </EuiResizablePanel>
+                      <EuiResizableButton />
+
+                      <EuiResizablePanel
+                        id="panel2"
+                        initialSize={80}
+                        minSize="65%"
+                        paddingSize="none"
+                      >
+                        <EuiPageBody className="deLayout__canvas">
+                          <MemoizedCanvas {...params} />
+                        </EuiPageBody>
+                      </EuiResizablePanel>
+                    </>
+                  );
+                }}
               </EuiResizableContainer>
             </Context>
           </Suspense>

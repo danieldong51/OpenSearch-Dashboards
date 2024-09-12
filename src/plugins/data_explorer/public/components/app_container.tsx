@@ -105,7 +105,7 @@ export const AppContainer = React.memo(
                         paddingSize="none"
                       >
                         <Sidebar>
-                          <MemoizedPanel {...params} element={minimizeButton} />
+                          <MemoizedPanel {...params} />
                         </Sidebar>
                       </EuiResizablePanel>
                       <EuiResizableButton />
